@@ -9,18 +9,19 @@
 #ifndef SCHEDULER_H_
 #define SCHEDULER_H_
 
+#define MAX_NAME_LENGTH (20)
+
 typedef int bool;
 enum { false, true };
 
-struct TaskStruct {
+typedef struct {
+	char name[MAX_NAME_LENGTH];
 	int total_exec_time;
 	int rem_exec_time;
 	int deadline;
 	int period;
-	pthread_t thread;
+	pthread_t* thread;
 	bool completed;				// completed during this period
-} new_task = {0,0,0,0,0,0};
-
-typedef struct TaskStruct Task;
+} Task;
 
 #endif /* SCHEDULER_H_ */
