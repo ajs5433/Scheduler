@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
-
+#include <ctype.h>
+#include <math.h>
 #include "Scheduler.h"
 
 #define NUM_TASKS (10)
@@ -74,7 +75,7 @@ int main(int argc, char *argv[]) {
 	char input;
 
 	while(input != 'a' && input != 'b' && input != 'c'){
-		printf("Select one scheduling algorithm: \n\t(a) Earliest Deadline First\n\t(b)Shortest Completion Time\n\t(c)Least Slack Time\n");
+		printf("Select one scheduling algorithm (enter letter of choice followed by a newline): \n\t(a) Earliest Deadline First\n\t(b)Shortest Completion Time\n\t(c)Least Slack Time\n");
 		input = getchar();
 	}
 	if (input == 'a') {
@@ -85,27 +86,49 @@ int main(int argc, char *argv[]) {
 		algorithm = &LST;
 	}
 
-	int c;
-	int p;
-	int d;
-	char name[MAX_NAME_LENGTH];
-	printf("Enter tasks:\n");
+
+	int cpd[3] = {0};
+	printf("Tasks to schedule:\n");
 	int taskCount = 0;
 	bool done = false;
 	while(!done) {
-		scanf("%d",&c);
-		if (d == 0) {
-			done = true;
-			break;
-		}
-		scanf("%d",&p);
-		scanf("%d",&d);
-		scanf("%s",name);
+		char name[MAX_NAME_LENGTH];
+		printf("Enter task name, followed by a newline:\n");
+		char input = getchar();
+		input = getchar();
+		int counter = 0;
 
+		// Get name
+		while(!isspace(input) && counter < MAX_NAME_LENGTH-1) {
+			name[counter++] = input;
+			input = getchar();
+		}
+		printf("Enter execution time, period, and deadline, separated by newlines:\n");
+		input = getchar();
+		input = getchar();
+		counter = 0;
+		int i;
+		for (i=0;i<3;i++) {
+			int multiplier = 1;
+			while (!isspace(input)) {
+				if (isdigit(input)) {
+					cpd[i] += input*multiplier;
+					multiplier *= 10;
+				}
+				input = getchar();
+			}
+			multiplier = 1;
+			input = getchar();
+		}
+
+		// Create the task
 		pthread_t* taskThread = NULL;
-		Task newTask = {name, c, c, p, d, taskThread, false};
+		Task newTask = {name, cpd[0], cpd[0], cpd[1], cpd[2], taskThread, false};
 		createThread(taskThread, &newTask);
-		tasks[taskCount] = &newTask;
+		tasks[taskCount++] = &newTask;
+		cpd[0] = 0;
+		cpd[1] = 0;
+		cpd[2] = 0;
 	}
 
 	return EXIT_SUCCESS;
