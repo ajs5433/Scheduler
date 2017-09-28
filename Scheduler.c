@@ -6,6 +6,7 @@
 #include "Scheduler.h"
 
 #define NUM_TASKS (10)
+#define _GNU_SOURCE
 
 Task* tasks[NUM_TASKS];
 
@@ -70,6 +71,13 @@ void createThread(pthread_t* thread, Task* task) {
 	pthread_create(thread, &attributes, execute, (void*)task);
 }
 
+void setPriority(Task* task, int priority){
+	pthread_setschedprio(*((*task).thread), priority);
+	//For testing purposes
+	struct sched_param* param;
+	pthread_getschedparam(*((*task).thread), NULL, param);
+	printf(*(task->name)+"%d", param->sched_priority);
+}
 
 int main(int argc, char *argv[]) {
 	char input;
@@ -91,6 +99,10 @@ int main(int argc, char *argv[]) {
 	printf("Tasks to schedule:\n");
 	int taskCount = 0;
 	bool done = false;
+
+	/*
+	 * SECTION TO ASK FOR THE USER INPUT OF THE THREADS
+	 *
 	while(!done) {
 		char name[MAX_NAME_LENGTH];
 		printf("Enter task name, followed by a newline:\n");
@@ -130,6 +142,20 @@ int main(int argc, char *argv[]) {
 		cpd[1] = 0;
 		cpd[2] = 0;
 	}
+	*/
+
+	int set1[12] = {1,3,3,2,5,5,1,10,10};
+	char names[3][3] = {{'o','n','e'},{'t','w','o'},{'t','h','r'}};
+	int i;
+
+	for (i = 0 ; i<12; i+=3){
+		pthread_t* taskThread = NULL;
+		Task newTask = {names[i], set1[i], set1[i], set1[i+1], set1[i+2], &taskThread, false};
+		createThread(taskThread, &newTask);
+		tasks[taskCount++] = &newTask;
+	}
+
+	setPriority(tasks[0], 5);
 
 	return EXIT_SUCCESS;
 }
